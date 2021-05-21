@@ -169,9 +169,26 @@
                        // Then calculate times for this entry
                        calc_times(control_entry);
                     });
+                    
+                $('#submit').click(
+                   function(e){
+                     e.preventDefault();
+                     var values = [];
+                     for (i = 0; i < 20; i++)
+                        var km = $("input[name='km']").val();
+                        if (km >= 0){
+                           var miles = $("input[name = 'miles']").val();
+                           var brevet_distance = $("input[name = 'brevet_dist_km']").val();
+                           var start_time = $("#open").val(); 
+                           var close_time = $("#close").val();
+                           var begin_date = $("#begin_date").val(); 
+                           values.add({brevet_distance: "brevet_distance", miles: "miles", km: "km", start_time: "start_time", close_time: "close_time", begin_date: "begin_date"});
+                        }
+                     }
+                     $.post(SUBMI_URL, {values: "values"} function(out)){
 
+                     }, "json");
                });
-
          </script>
       </div>
    </body>
