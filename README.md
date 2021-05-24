@@ -11,6 +11,6 @@ Each brevet distance has predetermined closing times. Thus, controles greater th
 
 We have taken Project 4 and added a database that stores the values unsing the Submit button and the input table is cleared. Then the user is given a message to click the Display button which redicts you to a new HTML page where the inputted values are displayed. It also displays the distance as well as where it begins at. 
 
-##Credits
+## Credits
 
 Michal Young, Ram Durairajan, Steven Walton, Joe Istas.
