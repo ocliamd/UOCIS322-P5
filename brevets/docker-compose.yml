@@ -1,3 +1,5 @@
+version: '3'
+
 services:
     web:
         build: .
@@ -5,7 +7,7 @@ services:
         volumes:
             - .:/app/
         ports:
-            - "10000:5000"
+            - "9750:5000"
         depends_on:
             - ourdb
         environment:
