@@ -222,7 +222,7 @@
                            $.post("/insert", {table: JSON.stringify(table)}, function(response){
                               console.log("response: ", response.output);
                            }, "json");
-                           alert("Successfully submitted! Click Display button to see the latest submit result.");
+                           alert("Success! Click Display button to see the latest results.");
                            $(".control_time_table tr td input").val("");
                            $('#brevet_dist_km').val("");
                            $('#begin_date').val("");
