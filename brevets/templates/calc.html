@@ -23,8 +23,7 @@
          integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF"
          crossorigin="anonymous"></script>
       <!-- moment.js is the JavaScript equivalent of arrow.py -->
-      <script
-      src="{{ url_for('static', filename="js/moment.min.js") }}"></script>
+      <script src="{{ url_for('static', filename='js/moment.min.js') }}"></script>
    </head>
    <!-- Our own stylesheet -->
    <link rel="stylesheet" href="/static/css/calc.css" />
@@ -62,11 +61,16 @@
                   </select>
                </div>
                <!-- columns 1 to 4  -->
-               <div class="col-md-6">
+               <div class="col-md-4">
                   <label>Begins at</label>
                   <input type="datetime-local" name="begin_date" id="begin_date" value="2021-01-01T00:00" />
                </div>
-               <!-- columns 5 to 10 -->
+               <!-- columns 5 to 8 -->
+               <div class="col-md-4">
+                  <button id="submit">Submit</button>
+                  <button id="display">Display</button>
+               </div>
+               <!-- columns 9 to 10 -->
             </div>
             <!-- row -->
             <br />  <!-- a little vertical space -->
@@ -115,80 +119,127 @@
             var SCRIPT_ROOT = {{ request.script_root|tojson|safe }} ;
             var TIME_CALC_URL = SCRIPT_ROOT + "/_calc_times";
 
-            // FIX ME!
-            // Right now, only the kilometers are passed
-            // you need to pass much more!
-            // View flask_brevets.py for details.
             function calc_times(control) {
               var km = control.find("input[name='km']").val();
-              var start_time = $("#begin_date").val();
-              var brevet_distance = $("#brevet_dist_km").val();
+              var brevet_dist = $('#brevet_dist_km').val();
+              var begin_date = $('#begin_date').val();
               var open_time_field = control.find("input[name='open']");
               var close_time_field = control.find("input[name='close']");
 
-              $.getJSON(TIME_CALC_URL, {km: km, start_time: start_time, brevet_distance: brevet_distance}).done(
-                function(data) {
-                   var times = data.result;
-                   console.log("Got a response: ");
-                   console.log("Response.open = " + times.open);
-                   // This part will automatically fill the open and close slots,
-                   // so don't worry about those.
-                   open_time_field.val(moment(times.open).format("YYYY-MM-DDTHH:mm"));
-                   close_time_field.val(moment(times.close).format("YYYY-MM-DDTHH:mm"));
-                 }
-               ).fail(function(err){
-                 // In case you get an error...
-                 console.log("Error!");
-                 console.log(err);
-               });
+              if (km > (brevet_dist * 1.2)) {
+                 console.log("The control point (" + km + " km) is over 20% longer than the theoretical distance (" + brevet_dist + " km). Retype the control location!");
+                 alert("The control point (" + km + " km) is over 20% longer than the theoretical distance (" + brevet_dist + " km). Retype the control location!");
+                 control.html("");
+              }
+              else {
+                 $.getJSON(TIME_CALC_URL, {km: km, brevet_dist: brevet_dist, begin_date: begin_date}).done(
+                   function(data) {
+                      var times = data.result;
+                      console.log("Got a response: ");
+                      console.log("Response.open = " + times.open);
+                      // This part will automatically fill the open and close slots,
+                      // so don't worry about those.
+                      open_time_field.val(moment(times.open).format("YYYY-MM-DDTHH:mm"));
+                      close_time_field.val(moment(times.close).format("YYYY-MM-DDTHH:mm"));
+                    }
+                  ).fail(function(err){
+                    // In case you get an error...
+                    console.log("Error!");
+                    console.log(err);
+                  });
+              }
             }
 
             $(document).ready(function(){
              // Do the following when the page is finished loading
-
+             
                 $('input[name="miles"]').change(
                    function() {
                        var miles = parseFloat($(this).val());
-                       var km = (1.609344 * miles).toFixed(6) ;
-                       console.log("Converted " + miles + " miles to " + km + " kilometers");
-                       var control_entry = $(this).parents(".control")
-                       var target = control_entry.find("input[name='km']");
-                       target.val( km );
-                       // Then calculate times for this entry
-                       calc_times(control_entry);
+                       if (miles < 0) {
+                          console.log("Control location can't be negative!");
+                          alert("Control location can't be negative!");
+                          $(this)[0].value = "";
+                       }
+                       else {
+                          var km = (1.609344 * miles).toFixed(6) ;
+                          console.log("Converted " + miles + " miles to " + km + " kilometers");
+                          var control_entry = $(this).parents(".control")
+                          var target = control_entry.find("input[name='km']");
+                          target.val( km );
+                          // Then calculate times for this entry
+                          calc_times(control_entry);
+                       }
                     });
 
                 $('input[name="km"]').change(
                    function() {
                        var km = parseFloat($(this).val());
-                       var miles = (0.621371 * km).toFixed(6) ;
-                       console.log("Converted " + km + " km to " + miles + " miles");
-                       var control_entry = $(this).parents(".control")
-                       var target = control_entry.find("input[name='miles']");
-                       target.val( miles );
-                       // Then calculate times for this entry
-                       calc_times(control_entry);
+                       if (km < 0) {
+                          console.log("Control location can't be negative!");
+                          alert("Control location can't be negative!");
+                          $(this)[0].value = "";
+                       }
+                       else {
+                          var miles = (0.621371 * km).toFixed(6) ;
+                          console.log("Converted " + km + " km to " + miles + " miles");
+                          var control_entry = $(this).parents(".control")
+                          var target = control_entry.find("input[name='miles']");
+                          target.val( miles );
+                          // Then calculate times for this entry
+                          calc_times(control_entry);
+                       }
                     });
-                    
-                $('#submit').click(
-                   function(e){
-                     e.preventDefault();
-                     var values = [];
-                     for (i = 0; i < 20; i++)
-                        var km = $("input[name='km']").val();
-                        if (km >= 0){
-                           var miles = $("input[name = 'miles']").val();
-                           var brevet_distance = $("input[name = 'brevet_dist_km']").val();
-                           var start_time = $("#open").val(); 
-                           var close_time = $("#close").val();
-                           var begin_date = $("#begin_date").val(); 
-                           values.add({brevet_distance: "brevet_distance", miles: "miles", km: "km", start_time: "start_time", close_time: "close_time", begin_date: "begin_date"});
-                        }
-                     }
-                     $.post(SUBMI_URL, {values: "values"} function(out)){
 
-                     }, "json");
+                $('#submit').click(
+                    function(e){
+                        e.preventDefault();
+                        // Collect all the non-empty fields and then sent it to /insert
+                        var table = {};
+                        // Counting the number of rows that were filled in
+                        var used = 0;
+                        $('.control').each(
+                            function(index, obj){
+                                var km = $(obj).find("input[name='km']").val()
+                                // Check if anything was typed in.
+                                if (km != ""){
+                                   var result = {};
+                                   result.brevet = $('#brevet_dist_km').val();
+                                   result.begin = $('#begin_date').val();
+                                   result.km = km;
+                                   result.open = $(obj).find("input[name='open']").val();
+                                   result.close = $(obj).find("input[name='close']").val();
+                                   table[index] = result;
+                                   used = used + 1;
+                                }
+                            }
+                        );
+                        // Case: When nothing was typed in on either miles or km
+                        if (used == 0) {
+                           alert("Need to insert at least one distance!");
+                        }
+                        else {
+                           $.post("/insert", {table: JSON.stringify(table)}, function(response){
+                              console.log("response: ", response.output);
+                           }, "json");
+                           alert("Successfully submitted! Click Display button to see the latest submit result.");
+                           $(".control_time_table tr td input").val("");
+                           $('#brevet_dist_km').val("");
+                           $('#begin_date').val("");
+                        }
+                    }
+                );
+
+
+                $('#display').click(
+                    function(e){
+                        e.preventDefault();
+                        // Redirect to /display
+                        window.location.replace("/display");
+                    }
+                );
                });
+
          </script>
       </div>
    </body>
